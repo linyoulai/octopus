@@ -29,7 +29,7 @@ public class UrlMapServiceTest {
         String domain = "localhost:9099";
         UrlMap urlMap = new UrlMap();
         urlMap.setUrlStatus(UrlMapStatus.AVAILABLE.getValue());
-        urlMap.setLongUrl("https://throwx.cn/2020/08/24/canal-ha-cluster-guide");
+        urlMap.setLongUrl("https://www.bilibili.com");
         urlMap.setDescription("测试短链");
         String url = urlMapService.createUrlMap(domain, urlMap);
         log.info("生成的短链:{}", url);

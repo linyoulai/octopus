@@ -25,15 +25,24 @@ public class VisitStatisticsTask {
     private final StatisticsService statisticsService;
     private final DistributedLockFactory distributedLockFactory;
 
-    @Scheduled(cron = "0 1 0 * * ?")
+    @Scheduled(cron = "*/2 * * * * ?")
     public void processVisitStatistics() {
         DistributedLock lock = distributedLockFactory.provideDistributedLock(LockKey.VISITOR_STATS_TASK.getCode());
         boolean tryLock = lock.tryLock(LockKey.VISITOR_STATS_TASK.getWaitTime(), LockKey.VISITOR_STATS_TASK.getReleaseTime(), TimeUnit.SECONDS);
         if (tryLock) {
             try {
+//                OffsetDateTime now = OffsetDateTime.now(TimeZoneConstant.CHINA.getZoneId());
+//                OffsetDateTime start = now.minusDays(1L).withNano(0).withSecond(0).withMinute(0).withHour(0);
+//                OffsetDateTime end = start.withNano(0).withSecond(59).withMinute(59).withHour(23);
+//                statisticsService.processVisitStatisticsDuration(start, end);
+
                 OffsetDateTime now = OffsetDateTime.now(TimeZoneConstant.CHINA.getZoneId());
-                OffsetDateTime start = now.minusDays(1L).withNano(0).withSecond(0).withMinute(0).withHour(0);
-                OffsetDateTime end = start.withNano(0).withSecond(59).withMinute(59).withHour(23);
+// 将 start 设置为今天凌晨零点
+                OffsetDateTime start = now.withNano(0).withSecond(0).withMinute(0).withHour(0);
+// 将 end 设置为当前时间
+                OffsetDateTime end = now;
+
+                System.out.println("正在统计时间范围: " + start + " 到 " + end); // 加上日志方便调试
                 statisticsService.processVisitStatisticsDuration(start, end);
             } finally {
                 lock.unlock();
