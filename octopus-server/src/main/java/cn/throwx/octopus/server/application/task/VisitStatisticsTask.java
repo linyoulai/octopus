@@ -25,10 +25,10 @@ public class VisitStatisticsTask {
     private final StatisticsService statisticsService;
     private final DistributedLockFactory distributedLockFactory;
 
-    @Scheduled(cron = "*/2 * * * * ?")
+    @Scheduled(cron = "0 0 1 * * ?") // 这里怎么设置成每天的凌晨一点启动任务？
     public void processVisitStatistics() {
         DistributedLock lock = distributedLockFactory.provideDistributedLock(LockKey.VISITOR_STATS_TASK.getCode());
-        boolean tryLock = lock.tryLock(LockKey.VISITOR_STATS_TASK.getWaitTime(), LockKey.VISITOR_STATS_TASK.getReleaseTime(), TimeUnit.SECONDS);
+        boolean tryLock = lock.tryLock(LockKey.VISITOR_STATS_TASK.getWaitTime(), LockKey.VISITOR_STATS_TASK.getReleaseTime(), TimeUnit.SECONDS);  // 怎么是trylock？获取不到锁就不统计数据了？
         if (tryLock) {
             try {
 //                OffsetDateTime now = OffsetDateTime.now(TimeZoneConstant.CHINA.getZoneId());

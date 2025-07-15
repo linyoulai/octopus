@@ -1,3 +1,7 @@
+-- noinspection SqlNoDataSourceInspectionForFile
+
+-- noinspection SqlDialectInspectionForFile
+
 CREATE DATABASE `db_octopus` CHARSET 'utf8mb4' COLLATE 'utf8mb4_unicode_520_ci';
 
 USE `db_octopus`;

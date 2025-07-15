@@ -48,9 +48,9 @@ public class TransformEventProcessTransformFilter implements TransformFilter {
         rabbitTemplate.convertAndSend(
                 RabbitQueue.TRANSFORM_EVENT_QUEUE.getExchangeName(),
                 RabbitQueue.TRANSFORM_EVENT_QUEUE.getRoutingKey(),
-                JacksonUtils.X.format(event)
+                JacksonUtils.X.format(event) // 这里的X是什么？
         );
-        chain.doFilter(context);
+        chain.doFilter(context); // 结束了吗？下一条代码在哪儿？
     }
 
     @Data

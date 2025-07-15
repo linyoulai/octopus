@@ -1,6 +1,7 @@
 package cn.throwx.octopus.server.filter;
 
 
+import cn.throwx.octopus.server.cache.BloomFilterManager;
 import cn.throwx.octopus.server.cache.UrlMapCacheManager;
 import cn.throwx.octopus.server.infra.common.TransformStatus;
 import cn.throwx.octopus.server.infra.exception.RedirectToErrorPageException;
@@ -27,6 +28,9 @@ public class UrlTransformFilter implements TransformFilter {
     @Autowired
     private UrlMapCacheManager urlMapCacheManager;
 
+    @Autowired
+    private BloomFilterManager bloomFilterManager; // 注入布隆过滤器管理器
+
     @Override
     public int order() {
         return 2;
@@ -41,6 +45,15 @@ public class UrlTransformFilter implements TransformFilter {
     public void doFilter(TransformFilterChain chain,
                          TransformContext context) {
         String compressionCode = context.getCompressionCode();
+
+        // 【新增】第一道防线：布隆过滤器校验
+        if (!bloomFilterManager.mightContain(compressionCode)) {
+            // 如果布隆过滤器说“绝对不存在”，直接中断链条并抛出异常
+            log.warn("布隆过滤器拦截到无效压缩码: {}", compressionCode);
+            throw new RedirectToErrorPageException(String.format("Invalid code: %s", compressionCode));
+        }
+        log.info("开始执行UrlTransformFilter,压缩码[{}]......", compressionCode);
+
         UrlMap urlMap = urlMapCacheManager.loadUrlMapCacheByCompressCode(compressionCode);
         context.setTransformStatus(TransformStatus.TRANSFORM_FAIL);
         if (Objects.nonNull(urlMap)) {

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DistributedLockFactory {
 
-    private static final String DISTRIBUTED_LOCK_PATH_PREFIX = "dl:";
+    private static final String DISTRIBUTED_LOCK_PATH_PREFIX = "dl:"; // 什么意思？？
     private final RedissonClient redissonClient;
 
     /**
@@ -23,7 +23,7 @@ public class DistributedLockFactory {
      * @param lockKey lockKey
      * @return DistributedLock
      */
-    public DistributedLock provideDistributedLock(String lockKey) {
+    public DistributedLock provideDistributedLock(String lockKey) { // lockKey 是什么？
         String lockPath = DISTRIBUTED_LOCK_PATH_PREFIX + lockKey;
         return new RedissonDistributedLock(redissonClient, lockPath);
     }

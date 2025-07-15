@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @description
  * @since 2020/12/25 0:13
  */
-@Data
+@Data // 序列化就是把对象转换成字节流，可以在通过RPC在网络上传输。
 public class Response<T> implements Serializable {
 
     public static final Long SUCCESS = 200L;

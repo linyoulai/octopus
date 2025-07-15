@@ -1,5 +1,6 @@
 package cn.throwx.octopus.server.service;
 
+import cn.throwx.octopus.server.cache.BloomFilterManager;
 import cn.throwx.octopus.server.cache.UrlMapCacheManager;
 import cn.throwx.octopus.server.filter.TransformContext;
 import cn.throwx.octopus.server.filter.TransformFilterChain;
@@ -53,6 +54,8 @@ public class UrlMapService implements BeanFactoryAware {
     private final UrlMapDao urlMapDao;
     private final CompressionCodeDao compressionCodeDao;
 
+    private final BloomFilterManager bloomFilterManager;
+
     private final UrlValidator urlValidator = new UrlValidator(new String[]{CommonConstant.HTTP_PROTOCOL,
             CommonConstant.HTTPS_PROTOCOL});
 
@@ -82,7 +85,7 @@ public class UrlMapService implements BeanFactoryAware {
         try {
             chain.doFilter(transformContext);
         } finally {
-            chain.release();
+            chain.release(); // 情况过滤器数组
             transformContext.release();
             if (log.isDebugEnabled()) {
                 log.debug("Exit TransformFilterChain,cost {} ms...", TimeUnit.NANOSECONDS.toMillis((System.nanoTime() - start)));
@@ -124,6 +127,8 @@ public class UrlMapService implements BeanFactoryAware {
             updater.setId(compressionCode.getId());
             // 事务
             self.saveUrlMapAndUpdateCompressCode(urlMap, updater);
+            // 添加到布隆过滤器
+            bloomFilterManager.add(urlMap.getCompressionCode());
             // 刷新缓存
             urlMapCacheManager.refreshUrlMapCache(urlMap);
             return shortUrl;
@@ -183,7 +188,7 @@ public class UrlMapService implements BeanFactoryAware {
         CompressionCode compressionCode = compressionCodeDao.getLatestAvailableCompressionCode();
         if (Objects.nonNull(compressionCode)) {
             return compressionCode;
-        } else {
+        } else { // 发现没有短码的时候紧急生成短码，这样的设计是否合理？
             generateBatchCompressionCodes();
             return Objects.requireNonNull(compressionCodeDao.getLatestAvailableCompressionCode());
         }
@@ -194,15 +199,15 @@ public class UrlMapService implements BeanFactoryAware {
      */
     private void generateBatchCompressionCodes() {
         for (int i = 0; i < compressCodeBatch; i++) {
-            long sequence = sequenceGenerator.generate();
+            long sequence = sequenceGenerator.generate(); // 1位符号位 (不用) + 41位时间戳 (毫秒级) + 10位机器ID (5位数据中心+5位工作节点) + 12位序列号
             CompressionCode compressionCode = new CompressionCode();
             compressionCode.setSequenceValue(String.valueOf(sequence));
             String code = ConversionUtils.X.encode62(sequence);
             code = code.substring(code.length() - 6);
             compressionCode.setCompressionCode(code);
-            compressionCodeDao.insertSelective(compressionCode);
+            compressionCodeDao.insertSelective(compressionCode); // 每次循环都插入一次吗？这样会不会导致很多次磁盘IO？
         }
-    }
+    }// 这里怎么没有判断新的压缩码是否与已有的压缩码重复了？在哪里判断了？数据库
 
     /**
      * 删除短链映射

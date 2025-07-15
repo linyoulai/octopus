@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 class RedissonDistributedLock implements DistributedLock {
 
     private final RedissonClient redissonClient;
-    private final String lockPath;
+    private final String lockPath; // 锁路径是啥
     private final RLock internalLock;
 
     RedissonDistributedLock(RedissonClient redissonClient, String lockPath) {
@@ -50,7 +50,7 @@ class RedissonDistributedLock implements DistributedLock {
         try {
             return internalLock.tryLock(waitTime, leaseTime, unit);
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt(); // 这句话是什么意思？
             throw new LockException(String.format("Acquire lock fail by thread interrupted,path:%s", lockPath), e);
         }
     }

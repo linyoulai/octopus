@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author throwable
- * @description 提取请求头过滤器
+ * @description 提取请求头过滤器(user-agent、cookie、客户端IP等)
  * @since 2020/7/21 17:12
  */
 @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -43,3 +43,6 @@ public class ExtractRequestHeaderTransformFilter implements TransformFilter {
         chain.doFilter(context);
     }
 }
+
+
+

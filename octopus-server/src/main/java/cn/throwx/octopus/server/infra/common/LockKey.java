@@ -10,12 +10,12 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 @Getter
-public enum LockKey {
+public enum LockKey { // enum的语法我还是不懂
 
     /**
      * 创建短链映射场景
      */
-    CREATE_URL_MAP("octopus:url:map:create", "创建URL映射", 0L, 10000L),
+    CREATE_URL_MAP("octopus:url:map:create", "创建URL映射", 0L, 10000L), // 这个是构造器吗？waittime和releasetime是什么意思？
 
     /**
      * 编辑短链映射场景
